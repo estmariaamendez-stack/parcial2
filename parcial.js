@@ -49,6 +49,40 @@ function drawCircleGuide(r) {
 
 const centerX = canvas.width / 2;
 const centerY = canvas.height / 2;
+/** =========================
+ * 🔥 PUNTO MEDIO (CÍRCULO)
+ * ========================= */
+function drawCircleMidpoint(r) {
+    let x = 0;
+    let y = r;
+    let p = 1 - r; // parámetro de decisión
+
+    function plotSymmetricPoints(cx, cy, x, y) {
+        plotPixel(cx + x, cy + y, "#444444");
+        plotPixel(cx - x, cy + y, "#444444");
+        plotPixel(cx + x, cy - y, "#444444");
+        plotPixel(cx - x, cy - y, "#444444");
+        plotPixel(cx + y, cy + x, "#444444");
+        plotPixel(cx - y, cy + x, "#444444");
+        plotPixel(cx + y, cy - x, "#444444");
+        plotPixel(cx - y, cy - x, "#444444");
+    }
+
+    while (x <= y) {
+        plotSymmetricPoints(centerX, centerY, x, y);
+
+        x++;
+
+        if (p < 0) {
+            // elegir pixel horizontal
+            p = p + 2 * x + 1;
+        } else {
+            // elegir pixel diagonal
+            y--;
+            p = p + 2 * (x - y) + 1;
+        }
+    }
+}
 
 /**
 POSICIONES ORBITALES segun trigonometria
@@ -129,11 +163,20 @@ function drawOrbit() {
     }
     drawPolygon(points);// se conecta con la fncion de dibujar poligonos
 }
+/**se inicia el funcionamiento completo */
+function render() {
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-/**se incia el funcionamiento */
-function inicializar() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawCircleGuide(R);
+    // 🔥 PUNTO MEDIO (círculo guía)
+    drawCircleMidpoint(R);
+
+    // sistema orbital
     drawOrbit();
+
+    time += 0.02;
+
+    requestAnimationFrame(render);
 }
-inicializar();
+
+/** INICIO */
+render();
