@@ -1,101 +1,73 @@
 /**
  * Parcial 2 - Sistema de Dispersión Geométrica Orbital
  * Computación Gráfica
- *  Universidad Militar Nueva Granada - Ingenieria Multimedia 
- * Asignatura: Introducción a la Computación Gráfica
- * Estudiante: Maria Alejandra Mendez Roncancio 
-
+ * Universidad Militar Nueva Granada
+ * Estudiante: Maria Alejandra Mendez Roncancio
  */
 
-/**se crea el canvas*/
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-// Dimensiones
+// dimensiones
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 
-// Centro del canvas (base del sistema orbital)
-const CX = WIDTH / 2;
-const CY = HEIGHT / 2;
+// centro (SOLO UNO, BIEN DEFINIDO)
+const centerX = WIDTH / 2;
+const centerY = HEIGHT / 2;
 
-/**se crea la unica funcion permitida para dibujar un pixel */
+// tiempo animación
+let time = 0;
+
+/** pixel base */
 function plotPixel(x, y, color = "#d6159c") {
     ctx.fillStyle = color;
     ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
 }
 
-/**valores aleatorios de N*/
-const R = 200; // radio órbita
-const N = Math.floor(Math.random() * 7) + 4; // 4 a 10 polígonos
+// parámetros
+const R = 200;
+const N = Math.floor(Math.random() * 7) + 4;
 
-/** =========================
- * una guia geometrica
- * CÍRCULO GUÍA (NUEVO)
- * *@param {number} r - Radio de la órbita
- * ========================= */
-function drawCircleGuide(r) {
-    let steps = 360;
-
-    for (let i = 0; i < steps; i++) {
-        let angle = (i * Math.PI * 2) / steps;
-
-        let x = centerX + r * Math.cos(angle);
-        let y = centerY + r * Math.sin(angle);
-
-        plotPixel(x, y, "#444444"); // gris guía
-    }
-}
-
-const centerX = canvas.width / 2;
-const centerY = canvas.height / 2;
 /** =========================
  * 🔥 PUNTO MEDIO (CÍRCULO)
  * ========================= */
 function drawCircleMidpoint(r) {
     let x = 0;
     let y = r;
-    let p = 1 - r; // parámetro de decisión
+    let p = 1 - r;
 
-    function plotSymmetricPoints(cx, cy, x, y) {
-        plotPixel(cx + x, cy + y, "#444444");
-        plotPixel(cx - x, cy + y, "#444444");
-        plotPixel(cx + x, cy - y, "#444444");
-        plotPixel(cx - x, cy - y, "#444444");
-        plotPixel(cx + y, cy + x, "#444444");
-        plotPixel(cx - y, cy + x, "#444444");
-        plotPixel(cx + y, cy - x, "#444444");
-        plotPixel(cx - y, cy - x, "#444444");
+    function plotSymmetric(cx, cy, x, y) {
+        plotPixel(cx + x, cy + y, "#444");
+        plotPixel(cx - x, cy + y, "#444");
+        plotPixel(cx + x, cy - y, "#444");
+        plotPixel(cx - x, cy - y, "#444");
+        plotPixel(cx + y, cy + x, "#444");
+        plotPixel(cx - y, cy + x, "#444");
+        plotPixel(cx + y, cy - x, "#444");
+        plotPixel(cx - y, cy - x, "#444");
     }
 
     while (x <= y) {
-        plotSymmetricPoints(centerX, centerY, x, y);
+        plotSymmetric(centerX, centerY, x, y);
 
         x++;
 
         if (p < 0) {
-            // elegir pixel horizontal
-            p = p + 2 * x + 1;
+            p += 2 * x + 1;
         } else {
-            // elegir pixel diagonal
             y--;
-            p = p + 2 * (x - y) + 1;
+            p += 2 * (x - y) + 1;
         }
     }
 }
 
-/**
-POSICIONES ORBITALES segun trigonometria
-*@param {number} r - Radio de la órbita
- * @param {number} n - Cantidad de polígonos
- * return retorna la posicon de el punto
-*/
-
-function getOrbitalPositions(r, n) {
+/** posiciones orbitales */
+function getOrbitalPositions(r, n, offset) {
     let positions = [];
 
     for (let i = 0; i < n; i++) {
-        let angle = (2 * Math.PI * i) / n;
+        let angle = (2 * Math.PI * i) / n + offset;
 
         let x = centerX + r * Math.cos(angle);
         let y = centerY + r * Math.sin(angle);
@@ -106,9 +78,7 @@ function getOrbitalPositions(r, n) {
     return positions;
 }
 
-/** =========================
- *  de manera manual ,RASTERIZACIÓN DE LÍNEAS (BRESENHAM SIMPLIFICADO)
- * ========================= */
+/** línea (Bresenham) */
 function drawLine(x0, y0, x1, y1, color = "white") {
     let dx = Math.abs(x1 - x0);
     let dy = Math.abs(y1 - y0);
@@ -137,9 +107,7 @@ function drawLine(x0, y0, x1, y1, color = "white") {
     }
 }
 
-/** =========================
- * DIBUJAR POLÍGONO ORBITAL
- * ========================= */
+/** polígono */
 function drawPolygon(points) {
     for (let i = 0; i < points.length; i++) {
         let next = (i + 1) % points.length;
@@ -152,25 +120,22 @@ function drawPolygon(points) {
     }
 }
 
-// -----------------------------
-// DIBUJAR ORBITE (puntos)
-// -----------------------------
+/** sistema orbital */
 function drawOrbit() {
-    const points = getOrbitalPositions(R, N);
+    const points = getOrbitalPositions(R, N, time);
 
     for (let p of points) {
         plotPixel(p.x, p.y, "red");
     }
-    drawPolygon(points);// se conecta con la fncion de dibujar poligonos
+
+    drawPolygon(points);
 }
-/**se inicia el funcionamiento completo */
+
+/** render */
 function render() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    // 🔥 PUNTO MEDIO (círculo guía)
     drawCircleMidpoint(R);
-
-    // sistema orbital
     drawOrbit();
 
     time += 0.02;
@@ -178,5 +143,4 @@ function render() {
     requestAnimationFrame(render);
 }
 
-/** INICIO */
 render();
