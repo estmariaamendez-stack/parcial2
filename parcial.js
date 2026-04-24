@@ -1,43 +1,30 @@
-/**
- * Parcial 2 - Sistema de Dispersión Geométrica Orbital
- * Computación Gráfica
- * Universidad Militar Nueva Granada
- * Estudiante: Maria Alejandra Mendez Roncancio
- */
-
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-// dimensiones
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 
-// centro (SOLO UNO, BIEN DEFINIDO)
 const centerX = WIDTH / 2;
 const centerY = HEIGHT / 2;
 
-// tiempo animación
 let time = 0;
 
-/** pixel base */
-function plotPixel(x, y, color = "#d6159c") {
+const R = 200;
+const N = 6;
+
+/** PIXEL */
+function plotPixel(x, y, color = "white") {
     ctx.fillStyle = color;
     ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
 }
 
-// parámetros
-const R = 200;
-const N = Math.floor(Math.random() * 7) + 4;
-
-/** =========================
- * 🔥 PUNTO MEDIO (CÍRCULO)
- * ========================= */
+/** PUNTO MEDIO (CÍRCULO) */
 function drawCircleMidpoint(r) {
     let x = 0;
     let y = r;
     let p = 1 - r;
 
-    function plotSymmetric(cx, cy, x, y) {
+    function drawSym(cx, cy, x, y) {
         plotPixel(cx + x, cy + y, "#444");
         plotPixel(cx - x, cy + y, "#444");
         plotPixel(cx + x, cy - y, "#444");
@@ -49,7 +36,7 @@ function drawCircleMidpoint(r) {
     }
 
     while (x <= y) {
-        plotSymmetric(centerX, centerY, x, y);
+        drawSym(centerX, centerY, x, y);
 
         x++;
 
@@ -62,34 +49,34 @@ function drawCircleMidpoint(r) {
     }
 }
 
-/** posiciones orbitales */
-function getOrbitalPositions(r, n, offset) {
-    let positions = [];
+/** POSICIONES */
+function getPoints(r, n, offset) {
+    let arr = [];
 
     for (let i = 0; i < n; i++) {
-        let angle = (2 * Math.PI * i) / n + offset;
+        let a = (2 * Math.PI * i) / n + offset;
 
-        let x = centerX + r * Math.cos(angle);
-        let y = centerY + r * Math.sin(angle);
-
-        positions.push({ x, y });
+        arr.push({
+            x: centerX + r * Math.cos(a),
+            y: centerY + r * Math.sin(a)
+        });
     }
 
-    return positions;
+    return arr;
 }
 
-/** línea (Bresenham) */
-function drawLine(x0, y0, x1, y1, color = "white") {
+/** LÍNEA */
+function drawLine(x0, y0, x1, y1) {
     let dx = Math.abs(x1 - x0);
     let dy = Math.abs(y1 - y0);
 
-    let sx = (x0 < x1) ? 1 : -1;
-    let sy = (y0 < y1) ? 1 : -1;
+    let sx = x0 < x1 ? 1 : -1;
+    let sy = y0 < y1 ? 1 : -1;
 
     let err = dx - dy;
 
     while (true) {
-        plotPixel(x0, y0, color);
+        plotPixel(x0, y0, "white");
 
         if (x0 === x1 && y0 === y1) break;
 
@@ -107,22 +94,21 @@ function drawLine(x0, y0, x1, y1, color = "white") {
     }
 }
 
-/** polígono */
+/** POLÍGONO */
 function drawPolygon(points) {
     for (let i = 0; i < points.length; i++) {
-        let next = (i + 1) % points.length;
+        let j = (i + 1) % points.length;
 
         drawLine(
             points[i].x, points[i].y,
-            points[next].x, points[next].y,
-            "white"
+            points[j].x, points[j].y
         );
     }
 }
 
-/** sistema orbital */
+/** ORBITA */
 function drawOrbit() {
-    const points = getOrbitalPositions(R, N, time);
+    const points = getPoints(R, N, time);
 
     for (let p of points) {
         plotPixel(p.x, p.y, "red");
@@ -131,7 +117,7 @@ function drawOrbit() {
     drawPolygon(points);
 }
 
-/** render */
+/** LOOP */
 function render() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
@@ -142,5 +128,11 @@ function render() {
 
     requestAnimationFrame(render);
 }
+/**EVIDENCIA DE CHAT PARA CONSULTA 
+ *  https://chatgpt.com/c/69ebb65e-f30c-83e9-8700-879e2f8f45f6 
+ * https://chatgpt.com/c/69ebb65e-f30c-83e9-8700-879e2f8f45f6
+ * https://chatgpt.com/c/69ebaf19-9158-83e9-9d1f-f3575ca35446
+ * https://chatgpt.com/c/69ebaa17-c3d0-83e9-b792-a9abf54b7c1f
+*/
 
 render();
