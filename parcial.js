@@ -29,11 +29,29 @@ function plotPixel(x, y, color = "#d6159c") {
 const R = 200; // radio órbita
 const N = Math.floor(Math.random() * 7) + 4; // 4 a 10 polígonos
 
+/** =========================
+ * una guia geometrica
+ * CÍRCULO GUÍA (NUEVO)
+ * *@param {number} r - Radio de la órbita
+ * ========================= */
+function drawCircleGuide(r) {
+    let steps = 360;
+
+    for (let i = 0; i < steps; i++) {
+        let angle = (i * Math.PI * 2) / steps;
+
+        let x = centerX + r * Math.cos(angle);
+        let y = centerY + r * Math.sin(angle);
+
+        plotPixel(x, y, "#444444"); // gris guía
+    }
+}
+
 const centerX = canvas.width / 2;
 const centerY = canvas.height / 2;
 
 /**
-POSICIONES ORBITALES
+POSICIONES ORBITALES segun trigonometria
 *@param {number} r - Radio de la órbita
  * @param {number} n - Cantidad de polígonos
  * return retorna la posicon de el punto
@@ -61,12 +79,14 @@ function drawOrbit() {
     const points = getOrbitalPositions(R, N);
 
     for (let p of points) {
-        plotPixel(ctx, p.x, p.y, "red");
+        plotPixel(p.x, p.y, "red");
     }
 }
 
 /**se incia el funcionamiento */
 function inicializar() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCircleGuide(R);
     drawOrbit();
 }
+inicializar();
