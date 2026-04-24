@@ -72,6 +72,52 @@ function getOrbitalPositions(r, n) {
     return positions;
 }
 
+/** =========================
+ *  de manera manual ,RASTERIZACIÓN DE LÍNEAS (BRESENHAM SIMPLIFICADO)
+ * ========================= */
+function drawLine(x0, y0, x1, y1, color = "white") {
+    let dx = Math.abs(x1 - x0);
+    let dy = Math.abs(y1 - y0);
+
+    let sx = (x0 < x1) ? 1 : -1;
+    let sy = (y0 < y1) ? 1 : -1;
+
+    let err = dx - dy;
+
+    while (true) {
+        plotPixel(x0, y0, color);
+
+        if (x0 === x1 && y0 === y1) break;
+
+        let e2 = 2 * err;
+
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
+/** =========================
+ * DIBUJAR POLÍGONO ORBITAL
+ * ========================= */
+function drawPolygon(points) {
+    for (let i = 0; i < points.length; i++) {
+        let next = (i + 1) % points.length;
+
+        drawLine(
+            points[i].x, points[i].y,
+            points[next].x, points[next].y,
+            "white"
+        );
+    }
+}
+
 // -----------------------------
 // DIBUJAR ORBITE (puntos)
 // -----------------------------
@@ -81,6 +127,7 @@ function drawOrbit() {
     for (let p of points) {
         plotPixel(p.x, p.y, "red");
     }
+    drawPolygon(points);// se conecta con la fncion de dibujar poligonos
 }
 
 /**se incia el funcionamiento */
